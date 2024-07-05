@@ -15,7 +15,7 @@ public class LterXmlSimulatorApplication {
         String xmlStr = xmlProcessor.convertDocumentToString();
         xmlStr = xmlProcessor.updateDate(xmlStr);
 
-        xmlProcessor.saveNewXml(xmlStr);
+        xmlProcessor.saveNewXmlAndFin(xmlStr);
 
 //        System.out.println(xmlStr);
 

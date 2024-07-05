@@ -33,6 +33,7 @@ public class XmlProcessor{
 
     private String originFileTotalPath;
     private String targetFileTotalPath;
+    private String targetFinFileTotalPath;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
     DateTimeFormatter formatterDash = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final String nowDate = LocalDate.now().format(formatter);
@@ -51,6 +52,7 @@ public class XmlProcessor{
         this.targetFilename = "B" + nowDate + "." + targetTimeRange + "_" + eqName + ".xml";
         this.originFileTotalPath = originFileRootPath + eqName + "/" + originFileDate+ "/" + originFilename;
         this.targetFileTotalPath = originFileRootPath + eqName + "/" + nowDate + "/" + targetFilename;
+        this.targetFinFileTotalPath = targetFileTotalPath.replace(".xml", ".fin");
     }
 
     String newBeginTime = "2022-08-12T00:00:00.000+09:00";
@@ -111,10 +113,11 @@ public class XmlProcessor{
         return xmlStr;
     }
 
-    public void saveNewXml(String xmlStr){
+    public void saveNewXmlAndFin(String xmlStr){
 
-        File targetFile = new File(targetFileTotalPath);
-        File parentDir = targetFile.getParentFile();
+        File targetXmlFile = new File(targetFileTotalPath);
+        File targetFinFile = new File(targetFinFileTotalPath);
+        File parentDir = targetXmlFile.getParentFile();
         if(!parentDir.exists()){
             if(parentDir.mkdirs()){
                 log.error("디렉토리 생성함");
@@ -124,11 +127,17 @@ public class XmlProcessor{
             }
         }
 
-
-        try(FileWriter fw = new FileWriter(targetFile)){
+        try(FileWriter fw = new FileWriter(targetXmlFile)){
             fw.write(xmlStr);
         } catch (IOException e){
-            log.error("xml 파일 저장 에러, {}",e.getMessage());
+            log.error("xml 파일 저장 에러 : {}",e.getMessage());
         }
+
+        try (FileWriter fw = new FileWriter(targetFinFile)) {
+            fw.write("");
+        } catch (IOException e){
+            log.error("fin 파일 저장 에러 : {}", e.getMessage());
+        }
+
     }
 }
