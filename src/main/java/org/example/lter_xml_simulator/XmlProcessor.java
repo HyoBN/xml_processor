@@ -46,7 +46,7 @@ public class XmlProcessor{
 
     private final String targetTimeRange = getRoundedTimeRange(LocalDateTime.now());
 
-    private String originFilename;
+    private final String originFilename;
     private String targetFilename;
 
 
@@ -60,6 +60,8 @@ public class XmlProcessor{
             LocalDateTime previousDayDateTime = localDateTime.minusDays(1);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
             originFileDateForFileName = formatter.format(previousDayDateTime);
+        } else{
+            originFileDateForFileName = originFileDate;
         }
         this.eqName = eqName;
         this.originFileDate = originFileDate;
@@ -70,6 +72,9 @@ public class XmlProcessor{
         this.targetFileTotalPath = originFileRootPath + eqName + "/" + nowDateForDirectory + "/" + targetFilename;
         this.targetFinFileTotalPath = targetFileTotalPath.replace(".xml", ".fin");
     }
+
+
+
     String nowDateDash = LocalDate.now().format(formatterDash);
     public void printFilePathTest(){
         log.error("originFilePath : " + originFileTotalPath);
@@ -82,7 +87,9 @@ public class XmlProcessor{
         int minute = dateTime.getMinute();
         int roundedMinute = (minute / 5) * 5;
         LocalDateTime endDateTime = dateTime.withMinute(roundedMinute).withSecond(0).withNano(0);
-        endDateTime = LocalDateTime.of(2024, 7, 5, 0, 0);
+
+        // 2355-0000 예외처리 테스트용
+                endDateTime = LocalDateTime.of(2024, 7, 5, 0, 0);
 
         LocalDateTime startDateTime = endDateTime.minusMinutes(5);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
