@@ -26,17 +26,23 @@ import java.time.format.DateTimeFormatter;
 public class XmlProcessor{
 
     private final String eqName;
+    private boolean isMidNight = false;
 
     private final String originFileDate;
+    private String originFileDateForFileName;
 //    private final String originFileRootPath = "/data4/lter_sim/sample_xml/csm/log/pm/ossraw";
     private final String originFileRootPath = "/Users/hyobin/Desktop/workspace/spring_projects/lter_xml_simulator/src/main/resources/";
 
     private String originFileTotalPath;
     private String targetFileTotalPath;
     private String targetFinFileTotalPath;
+
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
     DateTimeFormatter formatterDash = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private final String nowDate = LocalDate.now().format(formatter);
+
+    private String nowDate = LocalDate.now().format(formatter);
+    private String nowDateForDirectory = LocalDate.now().format(formatter);
+    private String nowDateForFileName = LocalDate.now().format(formatter);
 
     private final String targetTimeRange = getRoundedTimeRange(LocalDateTime.now());
 
@@ -46,34 +52,38 @@ public class XmlProcessor{
 
     public XmlProcessor(@Value("${spring.path.eqname}") String eqName,
                         @Value("${spring.path.date}") String originFileDate) throws Exception{
+        if (targetTimeRange.equals("2355-0000")) {
+            isMidNight = true;
+            nowDateForFileName = (LocalDate.now().minusDays(1)).format(formatter);
+            LocalDate localDate = LocalDate.parse(originFileDate, DateTimeFormatter.BASIC_ISO_DATE);
+            LocalDateTime localDateTime = localDate.atStartOfDay();
+            LocalDateTime previousDayDateTime = localDateTime.minusDays(1);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+            originFileDateForFileName = formatter.format(previousDayDateTime);
+        }
         this.eqName = eqName;
         this.originFileDate = originFileDate;
-        this.originFilename = "B" + originFileDate + "." + targetTimeRange + "_" + eqName + ".xml";
-        this.targetFilename = "B" + nowDate + "." + targetTimeRange + "_" + eqName + ".xml";
+        this.originFilename = "B" + originFileDateForFileName + "." + targetTimeRange + "_" + eqName + ".xml";
+        this.targetFilename = "B" + nowDateForFileName + "." + targetTimeRange + "_" + eqName + ".xml";
+
         this.originFileTotalPath = originFileRootPath + eqName + "/" + originFileDate+ "/" + originFilename;
-        this.targetFileTotalPath = originFileRootPath + eqName + "/" + nowDate + "/" + targetFilename;
+        this.targetFileTotalPath = originFileRootPath + eqName + "/" + nowDateForDirectory + "/" + targetFilename;
         this.targetFinFileTotalPath = targetFileTotalPath.replace(".xml", ".fin");
     }
-
-    String newBeginTime = "2022-08-12T00:00:00.000+09:00";
-
     String nowDateDash = LocalDate.now().format(formatterDash);
-
-
-
     public void printFilePathTest(){
         log.error("originFilePath : " + originFileTotalPath);
         log.error("targetFilePath : " + targetFileTotalPath);
+        log.error("midnight : " + isMidNight);
 
     }
-//    public static String formatDateStringToDash(String inputDate) {
-//        return inputDate.substring(0, 4) + "-" + inputDate.substring(4, 6) + "-" + inputDate.substring(6, 8);
-//    }
 
     public static String getRoundedTimeRange(LocalDateTime dateTime) {
         int minute = dateTime.getMinute();
         int roundedMinute = (minute / 5) * 5;
         LocalDateTime endDateTime = dateTime.withMinute(roundedMinute).withSecond(0).withNano(0);
+        endDateTime = LocalDateTime.of(2024, 7, 5, 0, 0);
+
         LocalDateTime startDateTime = endDateTime.minusMinutes(5);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
         return formatter.format(startDateTime) + "-" + formatter.format(endDateTime);
@@ -107,9 +117,20 @@ public class XmlProcessor{
 
     public String updateDate(String xmlStr){
         String originFileDateDash = originFileDate.substring(0, 4) + "-" + originFileDate.substring(4, 6) + "-" + originFileDate.substring(6, 8);
+        String originFileDateForNameDash = originFileDateForFileName.substring(0, 4) + "-" + originFileDateForFileName.substring(4, 6) + "-" + originFileDateForFileName.substring(6, 8);
+
         log.error("orign : {}, now : {}", originFileDateDash, nowDateDash);
         log.error(targetFileTotalPath);
-        xmlStr = xmlStr.replaceAll(originFileDateDash, nowDateDash);
+        try{
+            xmlStr = xmlStr.replaceAll(originFileDateDash, nowDateDash);
+            if (isMidNight) {
+                xmlStr = xmlStr.replace("beginTime=\"" + originFileDateForNameDash, "beginTime=\"" + LocalDate.now().minusDays(1).format(formatterDash));
+
+            }
+        } catch (Exception e){
+            log.error("Error converting document", e);
+        }
+
         return xmlStr;
     }
 
