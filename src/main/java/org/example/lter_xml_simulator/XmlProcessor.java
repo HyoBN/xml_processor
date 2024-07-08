@@ -45,7 +45,8 @@ public class XmlProcessor{
     private String nowDateForDirectory = LocalDate.now().format(formatter);
     private String nowDateForFileName = LocalDate.now().format(formatter);
 
-    private final String targetTimeRange = getRoundedTimeRange(LocalDateTime.now());
+//    private final String targetTimeRange = getRoundedTimeFiveMinuteRange(LocalDateTime.now());
+    private final String targetTimeRange = getRoundedTimeOneHourRange(LocalDateTime.now());
 
     private final String originFilename;
     private String targetFilename;
@@ -56,7 +57,8 @@ public class XmlProcessor{
                         @Value("${spring.path.sample.base}") String originFileRootPath,
                         @Value("${spring.path.destination.base}") String targetFileRootPath
                         ) throws Exception{
-        if (targetTimeRange.equals("2355-0000")) {
+        // if (targetTimeRange.equals("2355-0000")) {
+        if (targetTimeRange.equals("2300-0000")) {
             isMidNight = true;
             nowDateForFileName = (LocalDate.now().minusDays(1)).format(formatter);
             LocalDate localDate = LocalDate.parse(originFileDate, DateTimeFormatter.BASIC_ISO_DATE);
@@ -87,18 +89,27 @@ public class XmlProcessor{
 
     }
 
-    public static String getRoundedTimeRange(LocalDateTime dateTime) {
+    public static String getRoundedTimeFiveMinuteRange(LocalDateTime dateTime) {
         int minute = dateTime.getMinute();
         int roundedMinute = (minute / 5) * 5;
         LocalDateTime endDateTime = dateTime.withMinute(roundedMinute).withSecond(0).withNano(0);
-
         // 2355-0000 예외처리 테스트용
-//                endDateTime = LocalDateTime.of(2024, 7, 5, 0, 0);
-
+                endDateTime = LocalDateTime.of(2024, 7, 8, 0, 0);
         LocalDateTime startDateTime = endDateTime.minusMinutes(5);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
         return formatter.format(startDateTime) + "-" + formatter.format(endDateTime);
     }
+
+    public static String getRoundedTimeOneHourRange(LocalDateTime dateTime) {
+        LocalDateTime endDateTime = dateTime.withMinute(0).withSecond(0).withNano(0);
+        // 2300-0000 예외처리 테스트용
+        endDateTime = LocalDateTime.of(2024, 7, 8, 0, 0);
+        LocalDateTime startDateTime = endDateTime.minusHours(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
+        return formatter.format(startDateTime) + "-" + formatter.format(endDateTime);
+    }
+
+
 
     // 문자열을 Document 객체로 변환하는 메소드
     private static Document convertStringToDocument(String xmlStr) throws ParserConfigurationException, SAXException, IOException {

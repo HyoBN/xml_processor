@@ -1,9 +1,11 @@
 package org.example.lter_xml_simulator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
+@Slf4j
 @SpringBootApplication
 public class LterXmlSimulatorApplication {
 
@@ -21,5 +23,7 @@ public class LterXmlSimulatorApplication {
 
 //        xmlProcessor.printFilePathTest();
 
+        log.info("정상적으로 종료됨.");
+        System.exit(0);
     }
 }
