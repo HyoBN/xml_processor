@@ -30,9 +30,10 @@ public class XmlProcessor{
 
     private final String originFileDate;
     private String originFileDateForFileName;
-//    private final String originFileRootPath = "/data4/lter_sim/sample_xml/csm/log/pm/ossraw";
-    private final String originFileRootPath = "/Users/hyobin/Desktop/workspace/spring_projects/lter_xml_simulator/src/main/resources/";
 
+//    private final String originFileRootPath = "/data4/lter_sim/sample_xml/csm/log/pm/ossraw/";
+    private final String originFileRootPath = "/Users/hyobin/Desktop/workspace/spring_projects/lter_xml_simulator/src/main/resources/";
+    private String targetFileRootPath ;
     private String originFileTotalPath;
     private String targetFileTotalPath;
     private String targetFinFileTotalPath;
@@ -51,7 +52,10 @@ public class XmlProcessor{
 
 
     public XmlProcessor(@Value("${spring.path.eqname}") String eqName,
-                        @Value("${spring.path.date}") String originFileDate) throws Exception{
+                        @Value("${spring.path.date}") String originFileDate,
+                        @Value("${spring.path.sample.base}") String originFileRootPath,
+                        @Value("${spring.path.destination.base}") String targetFileRootPath
+                        ) throws Exception{
         if (targetTimeRange.equals("2355-0000")) {
             isMidNight = true;
             nowDateForFileName = (LocalDate.now().minusDays(1)).format(formatter);
@@ -69,7 +73,7 @@ public class XmlProcessor{
         this.targetFilename = "B" + nowDateForFileName + "." + targetTimeRange + "_" + eqName + ".xml";
 
         this.originFileTotalPath = originFileRootPath + eqName + "/" + originFileDate+ "/" + originFilename;
-        this.targetFileTotalPath = originFileRootPath + eqName + "/" + nowDateForDirectory + "/" + targetFilename;
+        this.targetFileTotalPath = targetFileRootPath + eqName + "/" + nowDateForDirectory + "/" + targetFilename;
         this.targetFinFileTotalPath = targetFileTotalPath.replace(".xml", ".fin");
     }
 
@@ -89,7 +93,7 @@ public class XmlProcessor{
         LocalDateTime endDateTime = dateTime.withMinute(roundedMinute).withSecond(0).withNano(0);
 
         // 2355-0000 예외처리 테스트용
-                endDateTime = LocalDateTime.of(2024, 7, 5, 0, 0);
+//                endDateTime = LocalDateTime.of(2024, 7, 5, 0, 0);
 
         LocalDateTime startDateTime = endDateTime.minusMinutes(5);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
@@ -126,8 +130,8 @@ public class XmlProcessor{
         String originFileDateDash = originFileDate.substring(0, 4) + "-" + originFileDate.substring(4, 6) + "-" + originFileDate.substring(6, 8);
         String originFileDateForNameDash = originFileDateForFileName.substring(0, 4) + "-" + originFileDateForFileName.substring(4, 6) + "-" + originFileDateForFileName.substring(6, 8);
 
-        log.error("orign : {}, now : {}", originFileDateDash, nowDateDash);
-        log.error(targetFileTotalPath);
+//        log.error("orign : {}, now : {}", originFileDateDash, nowDateDash);
+//        log.error(targetFileTotalPath);
         try{
             xmlStr = xmlStr.replaceAll(originFileDateDash, nowDateDash);
             if (isMidNight) {
@@ -148,7 +152,7 @@ public class XmlProcessor{
         File parentDir = targetXmlFile.getParentFile();
         if(!parentDir.exists()){
             if(parentDir.mkdirs()){
-                log.error("디렉토리 생성함");
+                log.info("디렉토리 생성");
             } else{
                 log.error("디렉토리 생성 실패");
                 return;
@@ -168,4 +172,5 @@ public class XmlProcessor{
         }
 
     }
+
 }

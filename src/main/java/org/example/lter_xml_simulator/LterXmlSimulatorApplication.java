@@ -19,7 +19,7 @@ public class LterXmlSimulatorApplication {
 
 //        System.out.println(xmlStr);
 
-        xmlProcessor.printFilePathTest();
+//        xmlProcessor.printFilePathTest();
 
     }
 }
